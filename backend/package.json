@@ -1,0 +1,23 @@
+{
+  "name": "musikempfehlung-backend",
+  "version": "1.0.0",
+  "description": "Backend für Musikempfehlungs-App mit MongoDB und Neo4j",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.6",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongodb": "^6.9.0",
+    "neo4j-driver": "^5.23.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}

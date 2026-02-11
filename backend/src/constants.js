@@ -1,0 +1,55 @@
+// Predefined mood keywords for track recommendations
+const MOODS = [
+    'Happy',
+    'Sad',
+    'Energetic',
+    'Calm',
+    'Romantic',
+    'Melancholic',
+    'Uplifting',
+    'Dark',
+    'Chill',
+    'Intense',
+    'Dreamy',
+    'Aggressive',
+    'Peaceful',
+    'Nostalgic',
+    'Mysterious',
+    'Epic',
+    'Groovy',
+    'Powerful',
+    'Atmospheric',
+    'Technical',
+    'Rebellious',
+    'Catchy',
+    'Sunny',
+    'Classic',
+    'Dramatic'
+];
+
+const GENRES = [
+    'Rock',
+    'Pop',
+    'Jazz',
+    'Classical',
+    'Electronic',
+    'Hip-Hop',
+    'R&B',
+    'Country',
+    'Blues',
+    'Reggae',
+    'Metal',
+    'Punk',
+    'Folk',
+    'Soul',
+    'Funk',
+    'Disco',
+    'House',
+    'Techno',
+    'Ambient',
+    'Trip-Hop',
+    'Indie',
+    'Alternative'
+];
+
+module.exports = { MOODS, GENRES };

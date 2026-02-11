@@ -1,0 +1,26 @@
+                  <td style={{ display: 'flex', gap: 6 }}>
+                    <button 
+                      className="btn btn-sm" 
+                      onClick={() => handleLike(t.trackId)} 
+                      style={{ 
+                        background: likedTracks.includes(t.trackId) ? 'var(--bg-hover)' : 'var(--accent-lo)', 
+                        color: likedTracks.includes(t.trackId) ? 'var(--text-lo)' : 'var(--accent)', 
+                        border: likedTracks.includes(t.trackId) ? '1px solid var(--border)' : '1px solid var(--accent)' 
+                      }} 
+                      title={likedTracks.includes(t.trackId) ? 'Unlike' : 'Like'}
+                    >
+                      ❤️
+                    </button>
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => openEdit(t)}
+                      disabled={!canModify(t)}
+                      title={!canModify(t) ? 'Nur Ersteller können bearbeiten' : ''}
+                    >✎</button>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleDelete(t.trackId)}
+                      disabled={!canModify(t)}
+                      title={!canModify(t) ? 'Nur Ersteller können löschen' : ''}
+                    >✕</button>
+                  </td>

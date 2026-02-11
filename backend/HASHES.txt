@@ -1,0 +1,9 @@
+// Generated password hashes - 2026-02-05T18:44:19.793Z
+
+// Users (password: password123)
+const USER_HASH = '$2b$10$oZrxTPGs2gcMSqNf7IMRlu84bEm6y99AozyPzCXk6vvCjGuzsFtyy';
+
+// Admin (password: admin123)
+const ADMIN_HASH = '$2b$10$795Y1v5Dj1ssOGrqjpBzse3IPBnu6iP/0taiUY.mvpMBeOuNH5yOC';
+
+// Use these in your seedData.js file

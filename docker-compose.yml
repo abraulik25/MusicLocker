@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: musik_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=musikempfehlung
+
+  neo4j:
+    image: neo4j:5.24
+    container_name: musik_neo4j
+    ports:
+      - "7474:7474"   # HTTP
+      - "7687:7687"   # Bolt
+    environment:
+      - NEO4J_AUTH=neo4j/neo4jpassword
+    volumes:
+      - neo4j_data:/data
+
+volumes:
+  mongo_data:
+  neo4j_data:
