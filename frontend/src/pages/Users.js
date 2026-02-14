@@ -57,8 +57,8 @@ export default function Users() {
 
   const handleUnfollow = async (targetUserId) => {
     try {
-      await neo4jApi.unfollowUser(user.userId, targetUserId);
-      setFollowing(prev => prev.filter(id => id !== targetUserId));
+      await mongoApi.unfollowUser(targetUserId);
+      await load();
     } catch (e) {
       alert("Fehler beim Entfolgen: " + e.message);
     }

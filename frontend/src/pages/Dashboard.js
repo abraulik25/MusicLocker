@@ -157,6 +157,8 @@ export default function Dashboard() {
       if (user) {
         const recs = await integrationApi.getRecommendations(user.userId);
         setRecommendations(recs);
+        // Genre-Statistik aktualisieren (Live-Update für das Diagramm)
+        await loadGenreStats();
       }
 
     } catch (e) {
