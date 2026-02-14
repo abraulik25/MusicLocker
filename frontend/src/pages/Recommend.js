@@ -27,6 +27,7 @@ export default function Recommend() {
   };
 
   const loadRecommendations = async () => {
+    // Wenn kein User eingeloggt ist, abbrechen
     if (!user) return;
     setLoading(true);
     try {
@@ -44,21 +45,21 @@ export default function Recommend() {
     if (!user) return;
     setLoading(true);
     try {
-      // Get all liked tracks with counts
+      // Alle gelikten Tracks mit Zähler holen
       const allLikes = await neo4jApi.queryAllLikes();
 
-      // Get current user's likes to filter them out
+      // Likes des aktuellen Users holen (zum Rausfiltern)
       const myLikes = await neo4jApi.queryUserLikes(user.userId);
 
-      // Filter out tracks the user already likes
+      // Tracks rausfiltern, die der User schon geliked hat
       const othersLikes = allLikes.filter(like => !myLikes.includes(like.trackId));
 
-      // Get track details from MongoDB
+      // Track-Details von MongoDB abrufen
       const allTracks = await mongoApi.getTracks();
       const tracksWithLikes = othersLikes.map(like => {
         const track = allTracks.find(t => t.trackId === like.trackId);
         return { ...track, likeCount: like.likeCount };
-      }).filter(t => t.trackId); // Filter out any tracks not found
+      }).filter(t => t.trackId); // Unbekannte Tracks entfernen
 
       setPopularTracks(tracksWithLikes);
     } catch (e) {
@@ -68,7 +69,7 @@ export default function Recommend() {
     }
   };
 
-  // Load appropriate data when switching tabs
+  // Daten je nach ausgewähltem Tab laden
   useEffect(() => {
     if (activeTab === 'popular' && popularTracks.length === 0) {
       loadPopularTracks();
@@ -121,7 +122,7 @@ export default function Recommend() {
         </button>
       </div>
 
-      {/* TAB: FÜR DICH (Personalized Recommendations) */}
+      {/* TAB: FÜR DICH (Personalisierte Empfehlungen) */}
       {activeTab === 'recommendations' && (
         <div>
           {/* Erklärung */}
@@ -176,7 +177,7 @@ export default function Recommend() {
         </div>
       )}
 
-      {/* TAB: VON ANDEREN GELIKT (Popular Tracks) */}
+      {/* TAB: VON ANDEREN GELIKT (Beliebte Tracks) */}
       {activeTab === 'popular' && (
         <div>
           {/* Erklärung */}

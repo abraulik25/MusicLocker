@@ -96,7 +96,7 @@ export default function Artists() {
   };
 
   const handleLike = (id) => {
-    // Visual toggle only as backend support is pending
+    // Nur optisch umschalten (Backend noch nicht fertig)
     setLikedArtists(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
   };
 
@@ -161,12 +161,9 @@ export default function Artists() {
 
   return (
     <div>
-      {/* Page Header */}
+      {/* Seiten-Header */}
       <div className="page-header">
-        <div className="page-header-left">
-          <h1 className="page-title">Künstler</h1>
-          <p className="page-subtitle">Verwalte Künstler und Bands</p>
-        </div>
+        <div><h1>Künstler</h1><span className="subtitle">Verwalte Künstler und Bands</span></div>
         <div className="page-header-right">
           <button className="btn btn-primary" onClick={openCreate}>+ Neuer Künstler</button>
         </div>
@@ -180,7 +177,7 @@ export default function Artists() {
           </div>
         </div>
 
-        {/* Search */}
+        {/* Suchfeld */}
         <div className="search-input-wrap mb-6">
           <span className="search-icon">🔍</span>
           <input
@@ -290,7 +287,7 @@ export default function Artists() {
         </div>
       )}
 
-      {/* Confirmation Modal */}
+      {/* Bestätigungs-Modal */}
       <ConfirmModal
         isOpen={confirmModal.isOpen}
         onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}

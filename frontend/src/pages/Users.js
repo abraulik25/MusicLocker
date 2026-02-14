@@ -80,8 +80,8 @@ export default function Users() {
 
   if (loading) return <div className="loading">Laden…</div>;
 
-  // Filter users
-  // Show all users to admin, otherwise hide admin and show others
+  // Benutzer filtern
+  // Admins sehen alle, normale User sehen keine Admins
   const visibleUsers = users
     .filter(u => isAdmin || u.role !== 'admin')
     .filter(u => u.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -94,12 +94,9 @@ export default function Users() {
 
   return (
     <div>
-      {/* Page Header */}
+      {/* Seiten-Header */}
       <div className="page-header">
-        <div className="page-header-left">
-          <h1 className="page-title">Community</h1>
-          <p className="page-subtitle">Finde und folge anderen Musikliebhabern</p>
-        </div>
+        <div><h1>Community</h1><span className="subtitle">Finde und folge anderen Musikliebhabern</span></div>
       </div>
 
       <div className="card">
@@ -110,7 +107,7 @@ export default function Users() {
           </div>
         </div>
 
-        {/* Search */}
+        {/* Suchfeld */}
         <div className="search-input-wrap mb-6">
           <span className="search-icon">🔍</span>
           <input
@@ -196,7 +193,7 @@ export default function Users() {
         </div>
       </div>
 
-      {/* Confirmation Modal */}
+      {/* Bestätigungs-Modal */}
       <ConfirmModal
         isOpen={confirmModal.isOpen}
         onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}

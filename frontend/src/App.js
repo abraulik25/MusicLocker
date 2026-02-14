@@ -28,7 +28,7 @@ function Sidebar() {
     { to: '/albums', label: 'Alben', icon: '💿' },
     { to: '/playlists', label: 'Playlists', icon: '📋' },
     { to: '/moods', label: 'Moods', icon: '🎭' },
-    { to: '/neo4j', label: 'Connections', icon: '🔗' },
+    { to: '/neo4j', label: 'Netzwerk', icon: '🔗' },
   ];
 
   return (
@@ -36,8 +36,8 @@ function Sidebar() {
       <div className="sidebar-logo">
         <span className="logo-icon">♫</span>
         <div className="logo-text-wrap">
-          <span className="logo-text">MusicGraph</span>
-          <span className="logo-subtitle">Neo4j Dashboard</span>
+          <span className="logo-text">Music Locker</span>
+          <span className="logo-subtitle">Dein Musik-Netzwerk</span>
         </div>
       </div>
       <ul className="sidebar-nav">
@@ -50,7 +50,7 @@ function Sidebar() {
           </li>
         ))}
       </ul>
-      {/* Sidebar Footer can remain for info but primary action is now TopBar */}
+      {/* Sidebar Footer (Infos über den eingeloggten User) */}
       <div className="sidebar-footer">
         {user && (
           <div className="user-info">
@@ -105,7 +105,7 @@ function TopBar() {
   );
 }
 
-// Protected Route wrapper
+// Diese Komponente schützt Seiten: Nur eingeloggte User dürfen sie sehen!
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return <div className="loading">Laden...</div>;
@@ -129,7 +129,7 @@ function AppContent() {
 
   if (loading) return <div className="loading">Laden...</div>;
 
-  // Show TopBar everywhere EXCEPT /neo4j
+  // TopBar (Profil-Menü) überall anzeigen, außer auf der Graph-Seite (/neo4j)
   const showTopBar = location.pathname !== '/neo4j';
 
   return (

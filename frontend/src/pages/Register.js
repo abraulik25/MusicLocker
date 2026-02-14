@@ -35,32 +35,32 @@ export default function Register() {
         e.preventDefault();
         setError('');
 
-        // Validate passwords match
+        // Validierung: Stimmen die Passwörter überein?
         if (password !== confirmPassword) {
             setError('Passwörter stimmen nicht überein');
             return;
         }
 
-        // Validate password length
+        // Validierung: Ist das Passwort lang genug?
         if (password.length < 6) {
             setError('Passwort muss mindestens 6 Zeichen lang sein');
             return;
         }
 
-        // Validate email format
+        // Validierung: Ist es eine echte Email-Adresse?
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             setError('Ungültiges Email-Format');
             return;
         }
 
-        // Validate name
+        // Validierung: Name vorhanden?
         if (name.length < 2) {
             setError('Name muss mindestens 2 Zeichen lang sein');
             return;
         }
 
-        // Validate moods
+        // Validierung: Wurden genau 3 Moods gewählt?
         if (selectedMoods.length !== 3) {
             setError('Bitte wähle genau 3 Moods für bessere Empfehlungen');
             return;
@@ -145,7 +145,7 @@ export default function Register() {
                         </div>
                     </div>
 
-                    {/* Mood Selection */}
+                    {/* Mood-Wahl */}
                     <div className="form-row">
                         <label className="label">
                             Wähle 3 Moods für erste Empfehlungen

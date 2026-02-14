@@ -3,10 +3,10 @@ const BASE = 'http://localhost:5000/api';
 async function api(method, path, body) {
   const opts = { method, headers: { 'Content-Type': 'application/json' } };
 
-  // Add JWT token if available
+  // JWT Token aus dem LocalStorage holen (falls eingeloggt)
   const token = localStorage.getItem('token');
   if (token) {
-    opts.headers['Authorization'] = `Bearer ${token}`;
+    opts.headers['Authorization'] = `Bearer ${token}`; // Token im Header mitsenden
   }
 
   if (body) opts.body = JSON.stringify(body);
@@ -17,7 +17,7 @@ async function api(method, path, body) {
   return data;
 }
 
-// ── Authentication ────────────────────────────────────────────────────────────
+// ── Authentifizierung (Login/Register) ────────────────────────────────────────
 export const authApi = {
   login: (credentials) => api('POST', '/auth/login', credentials),
   register: (userData) => api('POST', '/auth/register', userData),
@@ -26,7 +26,7 @@ export const authApi = {
 
 // ── MongoDB CRUD ──────────────────────────────────────────────────────────────
 export const mongoApi = {
-  // Users
+  // Benutzer
   getUsers: () => api('GET', '/users'),
   getUser: (id) => api('GET', `/users/${id}`),
   createUser: (d) => api('POST', '/users', d),
@@ -35,21 +35,21 @@ export const mongoApi = {
   followUser: (id) => api('POST', `/users/${id}/follow`),
   unfollowUser: (id) => api('DELETE', `/users/${id}/follow`),
 
-  // Artists
+  // Künstler
   getArtists: (genre) => api('GET', '/artists' + (genre ? `?genre=${genre}` : '')),
   getArtist: (id) => api('GET', `/artists/${id}`),
   createArtist: (d) => api('POST', '/artists', d),
   updateArtist: (id, d) => api('PUT', `/artists/${id}`, d),
   deleteArtist: (id) => api('DELETE', `/artists/${id}`),
 
-  // Albums
+  // Alben
   getAlbums: (artistId) => api('GET', '/albums' + (artistId ? `?artistId=${artistId}` : '')),
   getAlbum: (id) => api('GET', `/albums/${id}`),
   createAlbum: (d) => api('POST', '/albums', d),
   updateAlbum: (id, d) => api('PUT', `/albums/${id}`, d),
   deleteAlbum: (id) => api('DELETE', `/albums/${id}`),
 
-  // Tracks
+  // Lieder
   getTracks: (filters) => {
     const qs = new URLSearchParams(filters || {}).toString();
     return api('GET', '/tracks' + (qs ? `?${qs}` : ''));
@@ -59,7 +59,7 @@ export const mongoApi = {
   updateTrack: (id, d) => api('PUT', `/tracks/${id}`, d),
   deleteTrack: (id) => api('DELETE', `/tracks/${id}`),
 
-  // Playlists
+  // Playlisten
   getPlaylists: (scope = 'mine') => api('GET', '/playlists' + (scope ? `?scope=${scope}` : '')),
   getFollowingPlaylists: () => api('GET', '/playlists/following/all'),
   getDiscoverPlaylists: () => api('GET', '/playlists/discover/all'),
@@ -95,7 +95,7 @@ export const neo4jApi = {
   queryUserLikedAlbums: (id) => api('GET', `/neo4j/query/user-liked-albums/${id}`),
   queryAllLikes: () => api('GET', '/neo4j/query/all-likes'),
 
-  // Albums
+  // Alben im Neo4j Graph
   createAlbum: (d) => api('POST', '/neo4j/albums', d),
   deleteAlbum: (id) => api('DELETE', `/neo4j/albums/${id}`),
   addAlbumLike: (d) => api('POST', '/neo4j/likes/album', d), // d = { userId, albumId }

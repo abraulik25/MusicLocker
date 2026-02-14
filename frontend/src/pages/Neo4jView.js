@@ -6,6 +6,8 @@ export default function Neo4jView() {
   const { user } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [searchArtists, setSearchArtists] = useState('');
+  const [searchMoods, setSearchMoods] = useState('');
 
   useEffect(() => {
     loadData();
@@ -14,24 +16,30 @@ export default function Neo4jView() {
   const loadData = async () => {
     try {
       if (!user) return;
+      // 1. Zuerst holen wir alle gelikten Song-IDs aus Neo4j
       const likedTrackIds = await neo4jApi.queryUserLikes(user.userId);
+
+      // 2. Dann laden wir alle Song-Details und Künstler aus der MongoDB
       const [tracks, artists] = await Promise.all([
         mongoApi.getTracks(),
         mongoApi.getArtists()
       ]);
+
+      // 3. Wir verknüpfen die Daten: Nur gelikte Songs behalten + Künstlernamen hinzufügen
       const likedTracks = tracks.filter(t => likedTrackIds.includes(t.trackId))
         .map(t => {
           const artist = artists.find(a => a.artistId === t.artistId);
-          return { ...t, artistName: artist ? artist.name : 'Unknown' };
+          return { ...t, artistName: artist ? artist.name : 'Unbekannt' };
         });
 
-      // Aggregate Artists
+      // Statistik: Welche Künstler hören wir am meisten?
       const artistCounts = {};
       likedTracks.forEach(t => {
         if (!artistCounts[t.artistId]) artistCounts[t.artistId] = 0;
         artistCounts[t.artistId]++;
       });
 
+      // Liste der Top-Künstler erstellen
       const userArtists = artists
         .filter(a => artistCounts[a.artistId])
         .map(a => ({
@@ -40,7 +48,7 @@ export default function Neo4jView() {
         }))
         .sort((a, b) => b.count - a.count);
 
-      // Aggregate Moods
+      // Statistik: Welche Moods (Stimmungen) kommen oft vor?
       const moodCounts = {};
       likedTracks.forEach(t => {
         const tMoods = Array.isArray(t.mood) ? t.mood : (t.mood ? [t.mood] : []);
@@ -50,6 +58,7 @@ export default function Neo4jView() {
         });
       });
 
+      // Liste der Top-Moods erstellen
       const userMoods = Object.keys(moodCounts)
         .map(m => ({ name: m, count: moodCounts[m] }))
         .sort((a, b) => b.count - a.count);
@@ -68,16 +77,28 @@ export default function Neo4jView() {
 
   const [showModal, setShowModal] = useState(false);
 
+  const handleUnlike = async (trackId) => {
+    try {
+      // Optimistisch: Wir tun so, als ob es schon weg wäre (damit es sich schneller anfühlt)
+      console.log('Unliking track:', trackId);
+      await neo4jApi.removeLike(user.userId, trackId);
+      await loadData(); // Daten neu laden, damit die Liste aktuell bleibt
+    } catch (e) { console.error('Error unliking:', e); }
+  };
+
   if (loading) return <div className="loading">Laden…</div>;
 
   if (!data) return null;
 
   const { likedTracks, userArtists, userMoods } = data;
 
+  const filteredArtists = userArtists.filter(a => a.name.toLowerCase().includes(searchArtists.toLowerCase()));
+  const filteredMoods = userMoods.filter(m => m.name.toLowerCase().includes(searchMoods.toLowerCase()));
+
   return (
     <div>
       <div className="page-header" style={{ marginBottom: 40 }}>
-        <div><h1>Music Knowledge Graph</h1><span className="subtitle">Explore relationships between artists, albums, and tracks</span></div>
+        <div><h1>Deine Connections</h1><span className="subtitle">Dein persönliches Netzwerk</span></div>
       </div>
 
       <div style={{ textAlign: 'center', marginBottom: 40 }}>
@@ -86,26 +107,36 @@ export default function Neo4jView() {
       </div>
 
       <div className="connections-grid">
-        {/* LEFT COLUMN: ARTISTS */}
+        {/* LINKE SPALTE: KÜNSTLER */}
         <div className="conn-card">
           <div className="conn-header">
             <div className="conn-icon" style={{ background: 'var(--accent-lo)', color: 'var(--accent)' }}>🎵</div>
             <div>
               <div className="conn-title">Deine Künstler</div>
               <div className="conn-subtitle">{userArtists.length} Künstler</div>
+              <input
+                type="text"
+                placeholder="Suchen..."
+                value={searchArtists}
+                onChange={e => setSearchArtists(e.target.value)}
+                className="search-input-sm"
+                style={{ marginTop: 8, width: '100%', padding: '6px 10px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-main)', color: 'var(--text-main)', fontSize: 13 }}
+              />
             </div>
           </div>
           <div className="conn-list">
-            {userArtists.map(a => (
+            {filteredArtists.length > 0 ? filteredArtists.map(a => (
               <div key={a.artistId} className="conn-item">
                 <span>{a.name}</span>
                 <span className="conn-count">{a.count} Song{a.count !== 1 && 's'}</span>
               </div>
-            ))}
+            )) : (
+              <div style={{ padding: 12, textAlign: 'center', color: 'var(--text-lo)', fontSize: 13 }}>Keine Künstler gefunden.</div>
+            )}
           </div>
         </div>
 
-        {/* CENTER COLUMN: USER PROFILE */}
+        {/* MITTLERE SPALTE: PROFIL */}
         <div className="conn-card center-card">
           <div className="profile-avatar-lg">
             <div className="profile-initials">
@@ -140,27 +171,37 @@ export default function Neo4jView() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: MOODS */}
+        {/* RECHTE SPALTE: MOODS */}
         <div className="conn-card">
           <div className="conn-header">
             <div className="conn-icon" style={{ background: 'var(--pink-lo)', color: 'var(--pink)' }}>✨</div>
             <div>
               <div className="conn-title">Deine Moods</div>
               <div className="conn-subtitle">{userMoods.length} Stimmungen</div>
+              <input
+                type="text"
+                placeholder="Suchen..."
+                value={searchMoods}
+                onChange={e => setSearchMoods(e.target.value)}
+                className="search-input-sm"
+                style={{ marginTop: 8, width: '100%', padding: '6px 10px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-main)', color: 'var(--text-main)', fontSize: 13 }}
+              />
             </div>
           </div>
           <div className="conn-list">
-            {userMoods.map(m => (
+            {filteredMoods.length > 0 ? filteredMoods.map(m => (
               <div key={m.name} className="conn-item">
                 <span>{m.name}</span>
                 <span className="conn-count">{m.count} Song{m.count !== 1 && 's'}</span>
               </div>
-            ))}
+            )) : (
+              <div style={{ padding: 12, textAlign: 'center', color: 'var(--text-lo)', fontSize: 13 }}>Keine Moods gefunden.</div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Modal for Liked Songs Details */}
+      {/* Modal Details für gelikte Songs */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)} style={{ zIndex: 1000 }}>
           <div className="modal" style={{ maxWidth: 800, maxHeight: '80vh', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
@@ -181,6 +222,7 @@ export default function Neo4jView() {
                     <th style={{ padding: 12, color: 'var(--text-lo)' }}>Titel</th>
                     <th style={{ padding: 12, color: 'var(--text-lo)' }}>Künstler</th>
                     <th style={{ padding: 12, color: 'var(--text-lo)' }}>Moods / Stimmung</th>
+                    <th style={{ padding: 12, color: 'var(--text-lo)', textAlign: 'right' }}>Aktion</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -191,7 +233,7 @@ export default function Neo4jView() {
                       <td style={{ padding: 12 }}>
                         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                           {(Array.isArray(t.mood) ? t.mood : (t.mood ? [t.mood] : [])).map((m, i) => {
-                            // Simple hash for consistent color
+                            // Einfacher Hash für konsistente Farben
                             let hash = 0;
                             for (let j = 0; j < m.length; j++) hash = m.charCodeAt(j) + ((hash << 5) - hash);
                             const h = Math.abs(hash) % 360;
@@ -208,6 +250,16 @@ export default function Neo4jView() {
                             );
                           })}
                         </div>
+                      </td>
+                      <td style={{ padding: 12, textAlign: 'right' }}>
+                        <button
+                          className="btn btn-sm btn-secondary"
+                          style={{ color: 'var(--danger)' }}
+                          onClick={() => handleUnlike(t.trackId)}
+                          title="Entfernen"
+                        >
+                          💔
+                        </button>
                       </td>
                     </tr>
                   ))}

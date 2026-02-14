@@ -129,7 +129,7 @@ export default function Moods() {
                 <button className="btn btn-primary" onClick={openCreate}>+ Neues Mood</button>
             </div>
 
-            {/* Info Card */}
+            {/* Info-Bereich: Erklärung für den User */}
             <div className="card" style={{ marginBottom: 24, background: 'linear-gradient(135deg,rgba(124,58,237,0.07),rgba(236,72,153,0.07))', borderColor: 'var(--accent-md)' }}>
                 <div className="flex items-center gap-3">
                     <span style={{ fontSize: 28 }}>💡</span>
@@ -142,12 +142,12 @@ export default function Moods() {
                 </div>
             </div>
 
-            {/* Stats */}
+            {/* Statistik: Anzahl der Moods */}
             <div className="flex gap-3 items-center" style={{ marginBottom: 14 }}>
                 <span className="info-badge">📊 {moods.length} Moods insgesamt</span>
             </div>
 
-            {/* Table */}
+            {/* Tabelle der Moods */}
             <div className="table-wrap">
                 <table>
                     <thead>

@@ -72,4 +72,29 @@ Du musst die `.env` Dateien **manuell** vom alten auf den neuen PC kopieren (z.B
 ## 6. Starten
 Auf dem neuen PC:
 1.  Datenbanken (MongoDB / Neo4j) müssen erreichbar sein (ggf. Connection-Strings in `.env` anpassen oder Docker starten).
-2.  Starten wie gewohnt: `npm run dev` (Backend) und `npm start` (Frontend).
+75: 2.  Starten wie gewohnt: `npm run dev` (Backend) und `npm start` (Frontend).
+
+## 7. Bestehendes Repository aktualisieren
+Wenn du bereits eine ältere Version im Git hast und diese mit deinem aktuellen Stand überschreiben/aktualisieren möchtest:
+
+1.  Öffne das Terminal im Projektordner.
+2.  Führe folgende Befehle nacheinander aus:
+
+```powershell
+# Alle neuen Änderungen hinzufügen
+git add .
+
+# Änderungen speichern (Commit)
+git commit -m "Update auf neuste Version"
+
+# Auf GitHub hochladen
+git push
+```
+
+**Falls ein Fehler auftritt** (z.B. "Updates were rejected because the remote contains work that you do not have locally"):
+Das passiert, wenn auf GitHub Änderungen sind, die du lokal nicht hast. Wenn du sicher bist, dass du die GitHub-Version mit deiner lokalen Version **komplett überschreiben** willst, benutze:
+
+```powershell
+git push --force
+```
+*(Vorsicht: Dies löscht Änderungen auf GitHub, die du lokal nicht hast!)*

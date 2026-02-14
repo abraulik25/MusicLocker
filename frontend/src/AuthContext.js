@@ -8,7 +8,7 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Check if user is already logged in
+        // Prüfen, ob der User schon eingeloggt ist (Token im Speicher?)
         const token = localStorage.getItem('token');
         if (token) {
             authApi.me()

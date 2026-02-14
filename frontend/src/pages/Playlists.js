@@ -17,8 +17,8 @@ const Icons = {
 
 export default function Playlists() {
   const [playlists, setPlaylists] = useState([]);
-  const [likedTracks, setLikedTracks] = useState([]); // For Lieblingssongs
-  const [likedAlbumsList, setLikedAlbumsList] = useState([]); // For Liked Albums Tab
+  const [likedTracks, setLikedTracks] = useState([]); // Für Lieblingssongs
+  const [likedAlbumsList, setLikedAlbumsList] = useState([]); // Für Gelikte Alben Tab
   const [users, setUsers] = useState([]);
   const [tracks, setTracks] = useState([]);
   const [artists, setArtists] = useState([]);
@@ -28,7 +28,7 @@ export default function Playlists() {
   const [searchQuery, setSearchQuery] = useState('');
   const [aggView, setAggView] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('mine'); // 'mine', 'following', or 'discover'
+  const [activeTab, setActiveTab] = useState('mine'); // 'mine', 'following', 'albums' oder 'discover'
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
 
@@ -49,13 +49,15 @@ export default function Playlists() {
       setTracks(t);
       setArtists(a);
 
-      // Load liked tracks for "Lieblingssongs" virtual playlist
+      setArtists(a);
+
+      // Gelikte Songs laden (für die virtuelle "Lieblingssongs"-Playlist)
       if (user) {
         const liked = await neo4jApi.queryUserLikes(user.userId);
         setLikedTracks(liked);
       }
 
-      // Load playlists based on tab
+      // Playlisten laden (je nach ausgewähltem Tab)
       let p = [];
       if (activeTab === 'mine') {
         p = await mongoApi.getPlaylists('mine');
@@ -64,7 +66,7 @@ export default function Playlists() {
       } else if (activeTab === 'discover') {
         p = await mongoApi.getDiscoverPlaylists();
       } else if (activeTab === 'albums') {
-        // Load All Albums and filter by liked state
+        // Alle Alben laden und nur die behalten, die wir geliked haben
         const [allAlbums, likedAlbumIds] = await Promise.all([
           mongoApi.getAlbums(),
           neo4jApi.queryUserLikedAlbums(user.userId)
@@ -131,6 +133,21 @@ export default function Playlists() {
     });
   };
 
+  const handleUnlike = async (trackId) => {
+    try {
+      await neo4jApi.removeLike(user.userId, trackId);
+      // Lokalen State aktualisieren
+      setLikedTracks(prev => prev.filter(id => id !== trackId));
+      // Detail-Ansicht aktualisieren, falls offen
+      if (aggView && aggView.isVirtual) {
+        setAggView(prev => ({
+          ...prev,
+          trackIds: prev.trackIds.filter(id => id !== trackId)
+        }));
+      }
+    } catch (e) { console.error(e); }
+  };
+
   const calculateDuration = (trackIds) => {
     if (!trackIds || !Array.isArray(trackIds)) return 0;
     const totalSec = trackIds.reduce((acc, tid) => {
@@ -146,7 +163,7 @@ export default function Playlists() {
 
   if (loading) return <div style={{ color: 'var(--text-lo)', marginTop: 60, textAlign: 'center' }}>Laden…</div>;
 
-  // Create virtual "Lieblingssongs" playlist (only in Mine tab)
+  // Virtuelle "Lieblingssongs"-Playlist erstellen (nur bei "Meine Playlisten")
   const lieblingssongs = {
     playlistId: 'virtual_lieblingssongs',
     name: '❤️ Lieblingssongs',
@@ -158,10 +175,10 @@ export default function Playlists() {
     createdBy: user?.userId
   };
 
-  // Combine virtual playlist with real playlists (only for Mine tab)
+  // Virtuelle Playlist mit echten kombinieren (nur im "Mine"-Tab)
   let allPlaylists = activeTab === 'mine' ? [lieblingssongs, ...playlists] : playlists;
 
-  // Filter playlists by search query
+  // Suche in den Playlisten nach Name oder Beschreibung
   const filteredPlaylists = allPlaylists.filter(p => {
     const pName = p.name || '';
     const matchesName = pName.toLowerCase().includes(searchQuery.toLowerCase());
@@ -205,7 +222,7 @@ export default function Playlists() {
       </div>
 
       {activeTab === 'albums' ? (
-        // RENDER ALBUMS
+        // ALBEN RENDERN
         <div>
           <div style={{ marginBottom: 14 }}>
             <span className="info-badge">💿 {likedAlbumsList.length} Album{likedAlbumsList.length !== 1 ? 's' : ''}</span>
@@ -237,9 +254,9 @@ export default function Playlists() {
           )}
         </div>
       ) : (
-        // RENDER PLAYLISTS
+        // PLAYLISTEN RENDERN
         <>
-          {/* Stats */}
+          {/* Statistik */}
           <div style={{ marginBottom: 14 }}>
             <span className="info-badge">📋 {filteredPlaylists.length} Playlist{filteredPlaylists.length !== 1 ? 'en' : ''}</span>
             {activeTab === 'mine' && lieblingssongs.trackIds.length > 0 && (
@@ -249,7 +266,7 @@ export default function Playlists() {
             )}
           </div>
 
-          {/* Playlists Grid */}
+          {/* Liste der Playlisten */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
             {filteredPlaylists.map(p => (
               <div key={p.playlistId} className="card" style={{ padding: 18, cursor: 'pointer' }} onClick={() => setAggView(p)}>
@@ -270,7 +287,7 @@ export default function Playlists() {
                 </div>
                 {p.description && <div className="text-sm text-md" style={{ marginBottom: 10 }}>{p.description}</div>}
 
-                {/* DURATION ADDED HERE */}
+                {/* Dauer und Anzahl der Tracks */}
                 <div className="text-sm text-lo">
                   👤 {userName(p.userId)} • 🎵 {(p.trackIds || []).length} Tracks • ⏱️ {calculateDuration(p.trackIds)} min
                 </div>
@@ -299,7 +316,7 @@ export default function Playlists() {
         </>
       )}
 
-      {/* Playlist Detail View */}
+      {/* Playlist-Detailansicht (Modal) */}
       {aggView && (
         <div className="modal-overlay" onClick={close}>
           <div className="modal" style={{ maxWidth: 700 }} onClick={e => e.stopPropagation()}>
@@ -313,7 +330,7 @@ export default function Playlists() {
             <div className="modal-body">
               {aggView.description && <p className="text-md" style={{ marginBottom: 16 }}>{aggView.description}</p>}
 
-              {/* DURATION ADDED HERE */}
+              {/* Dauer und Info */}
               <div className="text-sm text-lo" style={{ marginBottom: 18 }}>
                 👤 {userName(aggView.userId)} • 🎵 {(aggView.trackIds || []).length} Tracks • ⏱️ {calculateDuration(aggView.trackIds)} min
               </div>
@@ -321,7 +338,14 @@ export default function Playlists() {
               {(aggView.trackIds || []).length > 0 ? (
                 <div className="table-wrap">
                   <table>
-                    <thead><tr><th>#</th><th>Titel</th><th>Künstler</th></tr></thead>
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Titel</th>
+                        <th>Künstler</th>
+                        {aggView.isVirtual && <th style={{ textAlign: 'right' }}>Aktion</th>}
+                      </tr>
+                    </thead>
                     <tbody>
                       {(aggView.trackIds || []).map((tid, i) => {
                         const track = tracks.find(t => t.trackId === tid);
@@ -330,6 +354,21 @@ export default function Playlists() {
                             <td style={{ width: 40 }}>{i + 1}</td>
                             <td>{track?.title || tid}</td>
                             <td className="text-sm text-lo">{track ? artistName(track.artistId) : '—'}</td>
+                            {aggView.isVirtual && (
+                              <td style={{ textAlign: 'right' }}>
+                                <button
+                                  className="btn btn-sm btn-secondary"
+                                  style={{ color: 'var(--danger)', padding: '4px 8px' }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleUnlike(tid);
+                                  }}
+                                  title="Unlink/Remove"
+                                >
+                                  💔
+                                </button>
+                              </td>
+                            )}
                           </tr>
                         );
                       })}
@@ -346,7 +385,7 @@ export default function Playlists() {
         </div>
       )}
 
-      {/* Create/Edit Modal */}
+      {/* Modal: Playlist erstellen/bearbeiten */}
       {modal && (
         <div className="modal-overlay" onClick={close}>
           <div className="modal" onClick={e => e.stopPropagation()}>
@@ -389,7 +428,7 @@ export default function Playlists() {
               <div className="form-row">
                 <label className="label">Tracks verwalten ({form.trackIds.length})</label>
 
-                {/* Search to Add */}
+                {/* Suche zum Hinzufügen */}
                 <div style={{ position: 'relative', marginBottom: 8 }}>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <input
@@ -444,7 +483,7 @@ export default function Playlists() {
                   }}></div>
                 </div>
 
-                {/* Selected Tracks List */}
+                {/* Liste der ausgewählten Tracks */}
                 <div style={{ maxHeight: 250, overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 8, padding: 8, background: 'var(--bg-hover)' }}>
                   {form.trackIds.length === 0 ? (
                     <div className="text-sm text-lo text-center py-4">Noch keine Tracks ausgewählt. Suche oben, um welche hinzuzufügen!</div>
@@ -479,7 +518,7 @@ export default function Playlists() {
         </div>
       )}
 
-      {/* Confirmation Modal */}
+      {/* Bestätigungs-Modal */}
       <ConfirmModal
         isOpen={confirmModal.isOpen}
         onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}

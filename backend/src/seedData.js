@@ -11,16 +11,17 @@ const adminUser = {
     favoriteGenres: ['Pop', 'Rock', 'Electronic'],
     preferredMoods: ['Energetic', 'Happy', 'Uplifting'],
     following: ['user_001', 'user_003', 'user_005'],
-    createdAt: new Date()
+    createdAt: new Date(),
+    likedTracks: ['trk_021', 'trk_023', 'trk_004']
 };
 
 // Users
 const users = [
-    { userId: 'user_001', name: 'Anna Schmidt', email: 'anna@example.com', password: '$2b$10$HXbuBy5FJXyCfrKTZqh8GeHQszAp1dJX5FmM25S8j5EK9tIVJu3uq', role: 'user', isActive: true, favoriteGenres: ['Rock', 'Pop'], preferredMoods: ['Happy', 'Energetic', 'Uplifting'], following: ['user_002', 'user_003'], createdAt: new Date() },
-    { userId: 'user_002', name: 'Ben Mueller', email: 'ben@example.com', password: '$2b$10$HXbuBy5FJXyCfrKTZqh8GeHQszAp1dJX5FmM25S8j5EK9tIVJu3uq', role: 'user', isActive: true, favoriteGenres: ['Hip-Hop', 'R&B'], preferredMoods: ['Calm', 'Smooth', 'Chill'], following: ['user_001', 'user_004'], createdAt: new Date() },
-    { userId: 'user_003', name: 'Clara Weber', email: 'clara@example.com', password: '$2b$10$HXbuBy5FJXyCfrKTZqh8GeHQszAp1dJX5FmM25S8j5EK9tIVJu3uq', role: 'user', isActive: true, favoriteGenres: ['Pop', 'Dance'], preferredMoods: ['Energetic', 'Happy', 'Uplifting'], following: ['user_001'], createdAt: new Date() },
-    { userId: 'user_004', name: 'David Fischer', email: 'david@example.com', password: '$2b$10$HXbuBy5FJXyCfrKTZqh8GeHQszAp1dJX5FmM25S8j5EK9tIVJu3uq', role: 'user', isActive: true, favoriteGenres: ['Rock', 'Alternative'], preferredMoods: ['Intense', 'Dark', 'Melancholic'], following: ['user_002', 'user_005'], createdAt: new Date() },
-    { userId: 'user_005', name: 'Emma Wagner', email: 'emma@example.com', password: '$2b$10$HXbuBy5FJXyCfrKTZqh8GeHQszAp1dJX5FmM25S8j5EK9tIVJu3uq', role: 'user', isActive: true, favoriteGenres: ['Electronic', 'Dance'], preferredMoods: ['Energetic', 'Uplifting', 'Happy'], following: ['user_001', 'user_003'], createdAt: new Date() },
+    { userId: 'user_001', name: 'Anna Schmidt', email: 'anna@example.com', password: '$2b$10$HXbuBy5FJXyCfrKTZqh8GeHQszAp1dJX5FmM25S8j5EK9tIVJu3uq', role: 'user', isActive: true, favoriteGenres: ['Rock', 'Pop'], preferredMoods: ['Happy', 'Energetic', 'Uplifting'], following: ['user_002', 'user_003'], createdAt: new Date(), likedTracks: ['trk_010', 'trk_011'] },
+    { userId: 'user_002', name: 'Ben Mueller', email: 'ben@example.com', password: '$2b$10$HXbuBy5FJXyCfrKTZqh8GeHQszAp1dJX5FmM25S8j5EK9tIVJu3uq', role: 'user', isActive: true, favoriteGenres: ['Hip-Hop', 'R&B'], preferredMoods: ['Calm', 'Smooth', 'Chill'], following: ['user_001', 'user_004'], createdAt: new Date(), likedTracks: ['trk_001', 'trk_002', 'trk_003'] },
+    { userId: 'user_003', name: 'Clara Weber', email: 'clara@example.com', password: '$2b$10$HXbuBy5FJXyCfrKTZqh8GeHQszAp1dJX5FmM25S8j5EK9tIVJu3uq', role: 'user', isActive: true, favoriteGenres: ['Pop', 'Dance'], preferredMoods: ['Energetic', 'Happy', 'Uplifting'], following: ['user_001'], createdAt: new Date(), likedTracks: ['trk_001', 'trk_004'] },
+    { userId: 'user_004', name: 'David Fischer', email: 'david@example.com', password: '$2b$10$HXbuBy5FJXyCfrKTZqh8GeHQszAp1dJX5FmM25S8j5EK9tIVJu3uq', role: 'user', isActive: true, favoriteGenres: ['Rock', 'Alternative'], preferredMoods: ['Intense', 'Dark', 'Melancholic'], following: ['user_002', 'user_005'], createdAt: new Date(), likedTracks: ['trk_001', 'trk_002', 'trk_005', 'trk_006'] },
+    { userId: 'user_005', name: 'Emma Wagner', email: 'emma@example.com', password: '$2b$10$HXbuBy5FJXyCfrKTZqh8GeHQszAp1dJX5FmM25S8j5EK9tIVJu3uq', role: 'user', isActive: true, favoriteGenres: ['Electronic', 'Dance'], preferredMoods: ['Energetic', 'Uplifting', 'Happy'], following: ['user_001', 'user_003'], createdAt: new Date(), likedTracks: ['trk_007', 'trk_015', 'trk_020'] },
 ];
 
 // Artists (Updated with origin and formedYear)

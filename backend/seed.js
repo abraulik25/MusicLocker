@@ -123,19 +123,27 @@ async function seed() {
         await db.collection('playlists').insertMany(playlists);
         console.log(`📋 Inserted ${playlists.length} playlists`);
 
-        // ── RELATIONSHIPS (Follows) ──
+        // ── RELATIONSHIPS (Follows & Likes) ──
         for (const u of allUsers) {
+            // FOLLOWS
             if (u.following && u.following.length > 0) {
-                // Mongo update (already inserted, but just to be sure if we didn't insert following array)
-                // seedData users have following array.
-
-                // Neo4j FOLLOWS
                 for (const targetId of u.following) {
                     await session.run(`
             MATCH (u1:User {userId: $u1})
             MATCH (u2:User {userId: $u2})
             MERGE (u1)-[:FOLLOWS]->(u2)
           `, { u1: u.userId, u2: targetId });
+                }
+            }
+
+            // LIKES (New!)
+            if (u.likedTracks && u.likedTracks.length > 0) {
+                for (const trackId of u.likedTracks) {
+                    await session.run(`
+            MATCH (u:User {userId: $userId})
+            MATCH (t:Track {trackId: $trackId})
+            MERGE (u)-[:LIKES]->(t)
+          `, { userId: u.userId, trackId: trackId });
                 }
             }
         }

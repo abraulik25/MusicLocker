@@ -99,7 +99,7 @@ export default function Albums() {
       if (modal === 'create') {
         const res = await mongoApi.createAlbum({ ...form, createdBy: user.userId });
         if (res.albumId) {
-          // Also create in Neo4j
+          // Auch im Neo4j-Graph erstellen (für Empfehlungen)
           await neo4jApi.createAlbum({ albumId: res.albumId });
         }
       } else {
@@ -320,7 +320,7 @@ export default function Albums() {
         </div>
       )}
 
-      {/* Confirmation Modal */}
+      {/* Bestätigungs-Modal */}
       <ConfirmModal
         isOpen={confirmModal.isOpen}
         onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}

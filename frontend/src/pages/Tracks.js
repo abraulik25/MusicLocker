@@ -5,13 +5,14 @@ import ConfirmModal from '../components/ConfirmModal';
 
 const EMPTY = { artistId: '', artistName: '', artistOrigin: '', artistFormedYear: '', albumId: '', title: '', duration_sec: '', genre: '', mood: [] };
 
-// SVG Icons
+// SVG Icons (selbst definiert, statt einer externen Library)
 const Icons = {
   Heart: ({ filled }) => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
     </svg>
   ),
+  // ... andere Icons
   Plus: () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -56,7 +57,7 @@ export default function Tracks() {
   const [tracks, setTracks] = useState([]);
   const [artists, setArtists] = useState([]);
   const [albums, setAlbums] = useState([]);
-  const [playlists, setPlaylists] = useState([]); // New: Playlists state
+  const [playlists, setPlaylists] = useState([]); // Playlists laden für "Add to Playlist"
   const [modal, setModal] = useState(null);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const [form, setForm] = useState(EMPTY);
@@ -68,7 +69,7 @@ export default function Tracks() {
   const [likedTracks, setLikedTracks] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: 'title', direction: 'asc' });
 
-  // Playlist Modal State
+  // Playlist-Modal Status
   const [showPlaylistModal, setShowPlaylistModal] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState(null);
 
@@ -81,7 +82,7 @@ export default function Tracks() {
         mongoApi.getTracks(),
         mongoApi.getArtists(),
         mongoApi.getAlbums(),
-        mongoApi.getPlaylists('mine') // Fetch playlists
+        mongoApi.getPlaylists('mine') // Playlisten laden
       ]);
       setTracks(t); setArtists(a); setAlbums(al); setPlaylists(p);
     } catch (e) { console.error(e); }
@@ -137,7 +138,7 @@ export default function Tracks() {
     try {
       let artistId = form.artistId;
 
-      // Create new artist if artistName is provided
+      // Neuen Künstler erstellen, wenn ein Name eingegeben wurde
       if (form.artistName && form.artistName.trim()) {
         const newArtist = await mongoApi.createArtist({
           name: form.artistName.trim(),
@@ -147,7 +148,7 @@ export default function Tracks() {
         });
         artistId = newArtist.artistId;
 
-        // Create artist in Neo4j
+        // Künstler auch in Neo4j anlegen
         await neo4jApi.createArtist({
           artistId: newArtist.artistId,
           name: newArtist.name,
@@ -200,14 +201,14 @@ export default function Tracks() {
     });
   };
 
-  // Simplified Like Handler - Only updates Neo4j and Local State
-  // Playlists.js will handle the virtual "Lieblingssongs" by querying Neo4j directly
+  // Eigener "Like"-Handler: Aktualisiert nur die lokale Anzeige und Neo4j
+  // Die "Lieblingssongs" Playlist wird in Playlists.js direkt aus Neo4j geladen
   const handleLike = async (trackId) => {
-    // 1. Optimistic Update
+    // 1. Optimistic Update: Wir zeigen das Herz SOFORT rot an
     const wasLiked = likedTracks.includes(trackId);
     console.log(`[Tracks] Toggling like for ${trackId}. Was liked? ${wasLiked}`);
 
-    // Update UI immediately
+    // UI sofort aktualisieren, bevor die Datenbank antwortet
     setLikedTracks(prev => {
       if (wasLiked) return prev.filter(id => id !== trackId);
       return [...prev, trackId];
@@ -215,26 +216,26 @@ export default function Tracks() {
 
     try {
       if (wasLiked) {
-        // Unlike
+        // Unlike: Verbindung in Neo4j entfernen
         await neo4jApi.removeLike(user.userId, trackId);
         console.log(`[Tracks] Unliked ${trackId} in Neo4j`);
       } else {
-        // Like
+        // Like: Verbindung in Neo4j erstellen
         await neo4jApi.addLike({ userId: user.userId, trackId });
         console.log(`[Tracks] Liked ${trackId} in Neo4j`);
       }
     } catch (e) {
       console.error('[Tracks] Like API failed:', e);
       alert('Fehler: ' + e.message);
-      // Revert UI on error
+      // Falls was schief geht: Herz wieder zurücksetzen (Rollback)
       setLikedTracks(prev => {
-        if (wasLiked) return [...prev, trackId]; // Add back if we removed it
-        return prev.filter(id => id !== trackId); // Remove if we added it
+        if (wasLiked) return [...prev, trackId]; // Wieder hinzufügen
+        return prev.filter(id => id !== trackId); // Oder wieder entfernen
       });
     }
   };
 
-  // Playlist Logic
+  // Playlist Logik
   const openAddToPlaylist = (track) => {
     setSelectedTrack(track);
     setShowPlaylistModal(true);
@@ -255,15 +256,15 @@ export default function Tracks() {
         trackIds: []
       });
 
-      // Refresh playlists
+      // Playlisten aktualisieren
       const p = await mongoApi.getPlaylists('mine');
       setPlaylists(p);
 
-      // Clear input
+      // Eingabefeld leeren
       const input = document.getElementById('new-playlist-name-input');
       if (input) input.value = '';
 
-      // Inline feedback instead of alert
+      // Feedback anzeigen (statt nervigem Alert)
       setCreationSuccess(true);
       setTimeout(() => setCreationSuccess(false), 2000);
 
@@ -280,17 +281,15 @@ export default function Tracks() {
 
       await mongoApi.updatePlaylist(playlist.playlistId, { trackIds: uniqueIds });
 
-      // Note: We do NOT auto-like here anymore to avoid complexity + recursion issues
+      // Hinweis: Wir liken den Song hier NICHT automatisch, um Komplexität zu vermeiden
 
-      // Close modal immediately and show small feedback if we had a toast system, 
-      // but for now just close it to be less intrusive than an alert
+      // Modal sofort schließen (weniger aufdringlich als ein Alert)
       setShowPlaylistModal(false);
 
-      // We could add a global toast here if we had one. 
-      // For now, let's just log it. The user sees it disappear so they know it worked.
+      // Wir könnten hier einen "Toast" anzeigen, aber ein Log reicht erstmal (User sieht, dass es zugeht)
       console.log(`"${selectedTrack.title}" hinzugefügt!`);
 
-      // Optional: Reload playlists to update the count in UI if we showed it
+      // Optional: Playlisten neu laden, um den Counter im UI zu updaten
       const p = await mongoApi.getPlaylists('mine');
       setPlaylists(p);
     } catch (e) {
@@ -373,10 +372,7 @@ export default function Tracks() {
   return (
     <div>
       <div className="page-header">
-        <div className="page-header-left">
-          <h1 className="page-title">Music Knowledge Graph</h1>
-          <p className="page-subtitle">Explore relationships between artists, albums, and tracks</p>
-        </div>
+        <div><h1>Lieder</h1><span className="subtitle">Verwalte Lieder deiner Sammlung</span></div>
         <div className="page-header-right">
           <button className="btn btn-primary" onClick={openCreate}>+ Neues Lied</button>
         </div>
@@ -385,12 +381,12 @@ export default function Tracks() {
       <div className="card">
         <div className="section-header mb-4">
           <div>
-            <h2 className="section-title">Lieder</h2>
+            <h2 className="section-title">Alle Lieder</h2>
             <p className="section-subtitle">{sortedFilteredTracks.length} von {tracks.length} Liedern</p>
           </div>
         </div>
 
-        {/* Filter Bar */}
+        {/* Filter-Leiste */}
         <div className="flex flex-col gap-4 mb-6">
           <div className="search-input-wrap">
             <span className="search-icon">🔍</span>
@@ -523,7 +519,7 @@ export default function Tracks() {
             <div className="modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <h3>{modal === 'create' ? 'Neues Lied' : 'Lied bearbeiten'}</h3>
             </div>
-            {/* Form content */}
+            {/* Formular-Inhalt */}
             <div className="flex flex-col gap-4">
               <div className="form-row">
                 <label className="label">Künstler</label>
@@ -618,7 +614,7 @@ export default function Tracks() {
         </div>
       )}
 
-      {/* Add To Playlist Modal */}
+      {/* Modal: Zur Playlist hinzufügen */}
       {showPlaylistModal && (
         <div className="modal-overlay" onClick={() => setShowPlaylistModal(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
@@ -672,7 +668,7 @@ export default function Tracks() {
           </div>
         </div>
       )}
-      {/* Confirmation Modal */}
+      {/* Bestätigungs-Modal */}
       <ConfirmModal
         isOpen={confirmModal.isOpen}
         onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}

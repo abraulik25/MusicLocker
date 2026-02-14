@@ -146,19 +146,66 @@ router.delete('/:playlistId', authenticate, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// GET /stats/genres
+// GET /stats/genres - Hybrid Aggregation (Playlists + Likes)
 router.get('/stats/genres', authenticate, async (req, res) => {
+  const session = require('../config/neo4j').getDriver().session();
   try {
-    const stats = await getDb().collection('playlists').aggregate([
+    // 1. Get stats from Playlists (MongoDB Aggregation)
+    const playlistStats = await getDb().collection('playlists').aggregate([
       { $match: { userId: req.user.userId } },
       { $unwind: '$trackIds' },
       { $lookup: { from: 'tracks', localField: 'trackIds', foreignField: 'trackId', as: 'track' } },
       { $unwind: '$track' },
-      { $group: { _id: '$track.genre', count: { $sum: 1 } } },
-      { $sort: { count: -1 } }
+      { $group: { _id: '$track.genre', count: { $sum: 1 } } }
     ]).toArray();
-    res.json(stats);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+
+    // 2. Get Liked Tracks from Neo4j
+    const neoResult = await session.run(
+      'MATCH (u:User {userId: $userId})-[:LIKES]->(t:Track) RETURN t.trackId AS trackId',
+      { userId: req.user.userId }
+    );
+    const likedTrackIds = neoResult.records.map(r => r.get('trackId'));
+
+    // 3. Get Genres for Liked Tracks (MongoDB Lookup)
+    let likedStats = [];
+    if (likedTrackIds.length > 0) {
+      likedStats = await getDb().collection('tracks').aggregate([
+        { $match: { trackId: { $in: likedTrackIds } } },
+        { $group: { _id: '$genre', count: { $sum: 1 } } }
+      ]).toArray();
+    }
+
+    // 4. Merge Results
+    const intervalMap = {}; // genre -> count
+
+    // Add Playlist counts
+    playlistStats.forEach(s => {
+      const g = s._id || 'Unbekannt';
+      if (!intervalMap[g]) intervalMap[g] = 0;
+      intervalMap[g] += s.count;
+    });
+
+    // Add Like counts
+    likedStats.forEach(s => {
+      const g = s._id || 'Unbekannt';
+      if (!intervalMap[g]) intervalMap[g] = 0;
+      intervalMap[g] += s.count;
+    });
+
+    // Convert back to array and sort
+    const finalStats = Object.keys(intervalMap).map(key => ({
+      _id: key,
+      count: intervalMap[key]
+    })).sort((a, b) => b.count - a.count);
+
+    res.json(finalStats);
+
+  } catch (e) {
+    console.error('Stats Error:', e);
+    res.status(500).json({ error: e.message });
+  } finally {
+    await session.close();
+  }
 });
 
 module.exports = router;
