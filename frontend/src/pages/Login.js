@@ -32,7 +32,7 @@ export default function Login() {
                 <div className="auth-logo">
                     <span className="logo-icon">♫</span>
                     <div className="logo-text-wrap">
-                        <span className="logo-text">MelodyGraph</span>
+                        <span className="logo-text">Music Locker</span>
                         <span className="logo-subtitle">Musikempfehlungs-System</span>
                     </div>
                 </div>
@@ -46,7 +46,7 @@ export default function Login() {
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="admin@melodygraph.com"
+                            placeholder="admin@musiclocker.com"
                             required
                             autoFocus
                         />

@@ -84,7 +84,7 @@ export default function Register() {
                 <div className="auth-logo">
                     <span className="logo-icon">♫</span>
                     <div className="logo-text-wrap">
-                        <span className="logo-text">MelodyGraph</span>
+                        <span className="logo-text">Music Locker</span>
                         <span className="logo-subtitle">Neuen Account erstellen</span>
                     </div>
                 </div>
