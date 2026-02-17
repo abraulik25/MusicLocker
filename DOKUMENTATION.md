@@ -19,44 +19,103 @@ Nutzer können sich registrieren, Musik durchsuchen (Künstler, Alben, Tracks), 
 ## 2. Installation
 
 ### Voraussetzungen
-- **Node.js** (v18+)
-- **MongoDB** (lokal auf Port 27017 oder MongoDB Atlas)
-- **Neo4j** (lokal auf Port 7687 oder Neo4j Aura)
+- **Docker** und **Docker Compose** (für MongoDB und Neo4j)
+- **Node.js** (v18+) und **npm** (für Backend und Frontend)
 
 ### Setup
 
+#### Schritt 1: Repository klonen
 ```bash
-# 1. Repository klonen
 git clone <repository-url>
 cd MelodyGraph_Musikempfehlung
+```
 
-# 2. Backend einrichten
+#### Schritt 2: Datenbanken mit Docker starten
+
+Im Projektordner liegt eine `docker-compose.yml`, die MongoDB und Neo4j konfiguriert:
+
+```yaml
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: musik_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=musikempfehlung
+
+  neo4j:
+    image: neo4j:5.24
+    container_name: musik_neo4j
+    ports:
+      - "7474:7474"   # Browser-UI
+      - "7687:7687"   # Bolt-Protokoll
+    environment:
+      - NEO4J_AUTH=neo4j/neo4jpassword
+    volumes:
+      - neo4j_data:/data
+
+volumes:
+  mongo_data:
+  neo4j_data:
+```
+
+Container starten:
+```bash
+docker-compose up -d
+```
+→ MongoDB läuft auf `localhost:27017`, Neo4j auf `localhost:7687` (Graph-Browser: `http://localhost:7474`)
+
+#### Schritt 3: Backend einrichten
+```bash
 cd backend
 npm install
+```
 
-# 3. .env Datei erstellen (im backend-Ordner)
-# Inhalt:
-#   MONGO_URI=mongodb://localhost:27017
-#   MONGO_DB=musikempfehlung
-#   NEO4J_URI=bolt://localhost:7687
-#   NEO4J_USER=neo4j
-#   NEO4J_PASS=neo4jpassword
-#   JWT_SECRET=dein_geheimer_schluessel
-#   PORT=5000
+`.env`-Datei im `backend/`-Ordner erstellen:
+```
+MONGO_URI=mongodb://localhost:27017
+MONGO_DB=musikempfehlung
+NEO4J_URI=bolt://localhost:7687
+NEO4J_USER=neo4j
+NEO4J_PASS=neo4jpassword
+JWT_SECRET=dein_geheimer_schluessel
+PORT=5000
+```
 
-# 4. Datenbank mit Testdaten befüllen
+#### Schritt 4: Datenbank mit Testdaten befüllen
+```bash
 node src/seed.js
+```
 
-# 5. Backend starten
+#### Schritt 5: Backend starten
+```bash
 npm run dev
+```
 
-# 6. Frontend einrichten (neues Terminal)
-cd ../frontend
+#### Schritt 6: Frontend starten (neues Terminal)
+```bash
+cd frontend
 npm install
 npm start
 ```
 
-Die App ist dann erreichbar unter `http://localhost:3000` (Frontend) und `http://localhost:5000` (Backend-API).
+### Erreichbarkeit
+
+| Dienst | URL |
+|--------|-----|
+| Frontend (React) | `http://localhost:3000` |
+| Backend (API) | `http://localhost:5000` |
+| Neo4j Browser | `http://localhost:7474` |
+
+### Docker-Container stoppen
+```bash
+docker-compose down        # Container stoppen
+docker-compose down -v     # Container + Daten löschen
+```
 
 ---
 

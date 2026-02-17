@@ -8,14 +8,14 @@ const NEO4J_USER = 'neo4j';
 const NEO4J_PASS = 'neo4jpassword';
 
 const newMoods = [
-    { moodId: 'mood_14', name: 'Rebellious', description: 'Aufsässige, rebellische Energie', keywords: ['defiant', 'revolutionary', 'bold'], createdAt: new Date() },
-    { moodId: 'mood_16', name: 'Catchy', description: 'Eingängige, mitreißende Melodien', keywords: ['memorable', 'hooky', 'infectious'], createdAt: new Date() },
-    { moodId: 'mood_18', name: 'Sunny', description: 'Sonnige Stimmung', keywords: ['sun', 'warm', 'bright'], createdAt: new Date() },
-    { moodId: 'mood_20', name: 'Classic', description: 'Klassische Vibes', keywords: ['traditional', 'standard'], createdAt: new Date() },
-    { moodId: 'mood_21', name: 'Dramatic', description: 'Dramatisch', keywords: ['drama', 'theatrical'], createdAt: new Date() },
-    { moodId: 'mood_22', name: 'Groovy', description: 'Rhythmisch, tanzbar, funkig', keywords: ['funk', 'rhythm', 'dance'], createdAt: new Date() },
-    { moodId: 'mood_23', name: 'Atmospheric', description: 'Stimmungsvoll, raumfüllend', keywords: ['ambient', 'space', 'moody'], createdAt: new Date() },
-    { moodId: 'mood_24', name: 'Technical', description: 'Technisch anspruchsvoll, komplex', keywords: ['complex', 'skill', 'virtuoso'], createdAt: new Date() }
+    { moodId: 'mood_014', name: 'Rebellious', description: 'Aufsässige, rebellische Energie', keywords: ['defiant', 'revolutionary', 'bold'], createdAt: new Date() },
+    { moodId: 'mood_016', name: 'Catchy', description: 'Eingängige, mitreißende Melodien', keywords: ['memorable', 'hooky', 'infectious'], createdAt: new Date() },
+    { moodId: 'mood_018', name: 'Sunny', description: 'Sonnige Stimmung', keywords: ['sun', 'warm', 'bright'], createdAt: new Date() },
+    { moodId: 'mood_020', name: 'Classic', description: 'Klassische Vibes', keywords: ['traditional', 'standard'], createdAt: new Date() },
+    { moodId: 'mood_021', name: 'Dramatic', description: 'Dramatisch', keywords: ['drama', 'theatrical'], createdAt: new Date() },
+    { moodId: 'mood_022', name: 'Groovy', description: 'Rhythmisch, tanzbar, funkig', keywords: ['funk', 'rhythm', 'dance'], createdAt: new Date() },
+    { moodId: 'mood_023', name: 'Atmospheric', description: 'Stimmungsvoll, raumfüllend', keywords: ['ambient', 'space', 'moody'], createdAt: new Date() },
+    { moodId: 'mood_024', name: 'Technical', description: 'Technisch anspruchsvoll, komplex', keywords: ['complex', 'skill', 'virtuoso'], createdAt: new Date() }
 ];
 
 async function migrate() {
@@ -52,8 +52,8 @@ async function migrate() {
         // Sync ALL moods to Neo4j (adds missing ones, updates existing ones with moodId)
         for (const m of allMoods) {
             await session.run(
-                'MERGE (m:Mood {name: $name}) SET m.moodId = $moodId',
-                { name: m.name, moodId: m.moodId }
+                'MERGE (m:Mood {moodId: $moodId})',
+                { moodId: m.moodId }
             );
             console.log(`   Synced Neo4j mood: ${m.name} (${m.moodId})`);
         }

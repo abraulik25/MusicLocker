@@ -232,12 +232,16 @@ router.post('/likes/album', async (req, res) => {
   finally { await session.close(); }
 });
 
-// LIKES entfernen (Albums)
+// LIKES entfernen (Albums) — löscht Album-Node wenn keine LIKES mehr vorhanden
 router.delete('/likes/album/:userId/:albumId', async (req, res) => {
   const session = getDriver().session();
   try {
     await session.run(
-      'MATCH (u:User {userId: $userId})-[r:LIKES]->(a:Album {albumId: $albumId}) DELETE r',
+      `MATCH (u:User {userId: $userId})-[r:LIKES]->(a:Album {albumId: $albumId})
+       DELETE r
+       WITH a
+       WHERE NOT EXISTS { ()-[:LIKES]->(a) }
+       DELETE a`,
       { userId: req.params.userId, albumId: req.params.albumId }
     );
     res.json({ message: 'Album unliked' });

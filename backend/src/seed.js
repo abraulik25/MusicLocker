@@ -60,32 +60,32 @@ async function seed() {
   // Create Users
   for (const u of [adminUser, ...users]) {
     await session.run(
-      'CREATE (u:User {userId: $userId, name: $name})',
-      { userId: u.userId, name: u.name }
+      'CREATE (u:User {userId: $userId})',
+      { userId: u.userId }
     );
   }
 
   // Create Artists
   for (const a of artists) {
     await session.run(
-      'CREATE (a:Artist {artistId: $artistId, name: $name})',
-      { artistId: a.artistId, name: a.name }
+      'CREATE (a:Artist {artistId: $artistId})',
+      { artistId: a.artistId }
     );
   }
 
   // Create Tracks
   for (const t of tracks) {
     await session.run(
-      'CREATE (t:Track {trackId: $trackId, title: $title})',
-      { trackId: t.trackId, title: t.title }
+      'CREATE (t:Track {trackId: $trackId})',
+      { trackId: t.trackId }
     );
   }
 
   // Create Moods (from predefined list with Ids)
   for (const m of moods) {
     await session.run(
-      'MERGE (m:Mood {moodId: $moodId, name: $name})',
-      { moodId: m.moodId, name: m.name }
+      'MERGE (m:Mood {moodId: $moodId})',
+      { moodId: m.moodId }
     );
   }
 

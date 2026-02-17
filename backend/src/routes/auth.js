@@ -95,8 +95,8 @@ router.post('/register', optionalAuthenticate, async (req, res) => {
             const driver = connectNeo4j();
             const session = driver.session();
             await session.run(
-                'MERGE (u:User {userId: $userId}) SET u.name = $name',
-                { userId, name }
+                'MERGE (u:User {userId: $userId})',
+                { userId }
             );
             await session.close();
             console.log(`[Auth] User ${userId} synced to Neo4j`);
