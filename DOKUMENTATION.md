@@ -21,17 +21,10 @@ Nutzer können sich registrieren, Musik durchsuchen (Künstler, Alben, Tracks), 
 ### Voraussetzungen
 - **Docker Desktop** (oder Docker Engine + Docker Compose) für MongoDB und Neo4j
 - **Node.js** (v18+) und **npm** (für Backend und Frontend)
-- **Git** (zum Klonen des Repositories)
 
 ### Setup
 
-#### Schritt 1: Repository klonen
-```bash
-git clone <repository-url>
-cd MelodyGraph_Musikempfehlung
-```
-
-#### Schritt 2: Datenbanken mit Docker starten
+#### Schritt 1: Datenbanken mit Docker starten
 
 Im Projektordner liegt eine `docker-compose.yml`, die MongoDB und Neo4j konfiguriert:
 
@@ -75,7 +68,7 @@ docker ps
 ```
 → MongoDB läuft auf `localhost:27017`, Neo4j auf `localhost:7687` (Graph-Browser: `http://localhost:7474`)
 
-#### Schritt 3: Umgebungsvariablen prüfen
+#### Schritt 2: Umgebungsvariablen prüfen
 
 Im Ordner `backend` liegt bereits die fertige `.env`-Datei für das Uni-Projekt. Diese wurde für die einfache Ausführung absichtlich mit ins Repository gepackt.
 
@@ -90,7 +83,7 @@ JWT_SECRET=super_secret_key_123
 JWT_EXPIRES_IN=24h
 ```
 
-#### Schritt 4: Backend und Frontend starten
+#### Schritt 3: Backend und Frontend starten
 
 Starten Sie beide Server manuell in zwei separaten Terminal-Fenstern. Installieren Sie zuerst die Abhängigkeiten:
 
@@ -108,7 +101,7 @@ npm install
 npm start
 ```
 
-#### Schritt 5: Datenbank mit Testdaten befüllen (einmalig)
+#### Schritt 4: Datenbank mit Testdaten befüllen (einmalig)
 ```bash
 node src/seed.js
 ```
