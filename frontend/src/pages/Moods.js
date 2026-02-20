@@ -46,9 +46,17 @@ export default function Moods() {
         setModal('edit');
     };
 
+    // Toast state
+    const [toast, setToast] = useState(null);
+
+    const showToast = (message, type = 'success') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 3000);
+    };
+
     const handleSubmit = async () => {
         if (!form.name.trim()) {
-            alert('Name ist erforderlich');
+            showToast('Name ist erforderlich', 'error');
             return;
         }
 
@@ -75,9 +83,9 @@ export default function Moods() {
 
             await load();
             setModal(null);
-            alert(editingId ? 'Mood aktualisiert ✓' : 'Mood erstellt ✓');
+            showToast(editingId ? 'Mood aktualisiert ✓' : 'Mood erstellt ✓');
         } catch (e) {
-            alert(e.message);
+            showToast(e.message, 'error');
         }
     };
 
@@ -85,7 +93,7 @@ export default function Moods() {
         setConfirmModal({
             isOpen: true,
             title: 'Mood löschen',
-            message: 'Möchtest du dieses Mood wirklich löschen?',
+            message: 'Möchtest du dieses Mood wirklich löschen? Tracks behalten ihre anderen Moods.',
             onConfirm: async () => {
                 try {
                     const token = localStorage.getItem('token');
@@ -100,9 +108,9 @@ export default function Moods() {
                     }
 
                     await load();
-                    alert('Mood gelöscht ✓');
+                    showToast('Mood gelöscht ✓');
                 } catch (e) {
-                    alert(e.message);
+                    showToast(e.message, 'error');
                 }
             }
         });
@@ -121,7 +129,32 @@ export default function Moods() {
 
     return (
         <div>
+            {toast && (
+                <div className={`toast toast-${toast.type}`}>
+                    {toast.message}
+                </div>
+            )}
+            <style>{`
+                .toast {
+                    position: fixed;
+                    bottom: 24px;
+                    right: 24px;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    color: white;
+                    font-weight: 500;
+                    animation: slideIn 0.3s ease-out;
+                    z-index: 1000;
+                }
+                .toast-success { background: var(--accent-md); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3); }
+                .toast-error { background: #ef4444; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
+                @keyframes slideIn {
+                    from { transform: translateY(100%); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+            `}</style>
             <div className="page-header">
+
                 <div>
                     <h1>🎭 Moods</h1>
                     <span className="subtitle">Verwalte emotionale Stimmungen für Tracks</span>
@@ -198,13 +231,13 @@ export default function Moods() {
                     <div className="modal" onClick={e => e.stopPropagation()}>
                         <div className="modal-header">
                             <h2>{modal === 'create' ? 'Neues Mood' : 'Mood bearbeiten'}</h2>
-                            <button className="modal-close" onClick={() => setModal(null)}>✕</button>
                         </div>
                         <div className="modal-body">
                             <div className="form-row">
                                 <label className="label">Name *</label>
                                 <input
                                     className="input"
+                                    style={{ fontFamily: 'inherit' }}
                                     value={form.name}
                                     onChange={e => setForm({ ...form, name: e.target.value })}
                                     placeholder="z.B. Happy, Melancholic, Energetic"
@@ -214,6 +247,7 @@ export default function Moods() {
                                 <label className="label">Beschreibung (optional)</label>
                                 <textarea
                                     className="input"
+                                    style={{ fontFamily: 'inherit' }}
                                     rows="3"
                                     value={form.description}
                                     onChange={e => setForm({ ...form, description: e.target.value })}

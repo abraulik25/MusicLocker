@@ -165,6 +165,41 @@ router.put('/:trackId', authenticate, async (req, res) => {
       { returnDocument: 'after' }
     );
     if (!result) return res.status(404).json({ error: 'Track nicht gefunden' });
+
+    // Sync HAS_MOOD relationships to Neo4j when moods change
+    if (mood !== undefined) {
+      try {
+        const { getDriver } = require('../config/neo4j');
+        const session = getDriver().session();
+
+        // 1. Remove all old HAS_MOOD relationships for this track
+        await session.run(
+          'MATCH (t:Track {trackId: $trackId})-[r:HAS_MOOD]->() DELETE r',
+          { trackId: req.params.trackId }
+        );
+
+        // 2. Create new HAS_MOOD relationships based on updated mood list
+        const updatedMoods = Array.isArray(mood) ? mood : (mood ? [mood] : []);
+        const allMoods = await getDb().collection('moods').find().toArray();
+        for (const moodName of updatedMoods) {
+          const moodObj = allMoods.find(m => m.name === moodName);
+          if (moodObj) {
+            await session.run(
+              `MATCH (t:Track {trackId: $trackId})
+               MERGE (m:Mood {moodId: $moodId})
+               MERGE (t)-[:HAS_MOOD]->(m)`,
+              { trackId: req.params.trackId, moodId: moodObj.moodId }
+            );
+          }
+        }
+
+        await session.close();
+        console.log(`Synced HAS_MOOD for track ${req.params.trackId}: ${updatedMoods.join(', ')}`);
+      } catch (neo4jError) {
+        console.error('Neo4j mood sync error:', neo4jError);
+      }
+    }
+
     res.json(result);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

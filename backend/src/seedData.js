@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const adminUser = {
     userId: 'user_admin',
     name: 'Admin',
-    email: 'admin@melodygraph.com',
+    email: 'admin@musiclocker.com',
     password: '$2b$10$w1fY6ADhU3rDTuMGeaCWxux99OhlNfZ3aAosZkrCo/ZfgVjZ.2Ire',
     role: 'admin',
     isActive: true,

@@ -26,3 +26,9 @@ yarn-error.log*
 # Editor
 .vscode/
 .idea/
+
+# Dokumentation (wird separat abgegeben)
+DOKUMENTATION.md
+DOKUMENTATION.tex
+GIT_ANLEITUNG.md
+fixed_button.txt

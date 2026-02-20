@@ -78,7 +78,7 @@ export default function Login() {
 
                 <div className="auth-link">
                     <div className="text-sm text-lo mb-4">
-                        Standard-Login: <code>admin@melodygraph.com</code> / <code>admin123</code><br />
+                        Standard-Login: <code>admin@musiclocker.com</code> / <code>admin123</code><br />
                         Oder: <code>anna@example.com</code> / <code>password123</code>
                     </div>
                     <p className="text-sm text-md">

@@ -4,7 +4,7 @@ const { getDb } = require('./mongo');
 // ── Initialize Default Admin Account ──────────────────────────────────────────
 async function initializeAdmin() {
     try {
-        const adminEmail = 'admin@melodygraph.com';
+        const adminEmail = 'admin@musiclocker.com';
 
         // Check if admin already exists
         const existingAdmin = await getDb().collection('users').findOne({ email: adminEmail });

@@ -48,7 +48,7 @@ async function seed() {
         // We will force use our seed data admin for consistency in this demo.
         // But initAdmin.js might have created one with different ID. 
         // We will just insert our admin from seedData. 
-        // If you log in as 'admin@melodygraph.com', you'll match this one.
+        // If you log in as 'admin@musiclocker.com', you'll match this one.
 
         // Insert Users
         const allUsers = [adminUser, ...users];

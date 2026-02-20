@@ -47,6 +47,20 @@ router.post('/', authenticate, async (req, res) => {
         };
 
         await getDb().collection('moods').insertOne(doc);
+
+        // Sync: Create Mood node in Neo4j
+        try {
+            const neo4jDriver = require('neo4j-driver');
+            const { NEO4J_URI, NEO4J_USER, NEO4J_PASS } = process.env;
+            const driver = neo4jDriver.driver(NEO4J_URI, neo4jDriver.auth.basic(NEO4J_USER, NEO4J_PASS));
+            const session = driver.session();
+            await session.run('MERGE (m:Mood {moodId: $moodId})', { moodId });
+            await session.close();
+            await driver.close();
+        } catch (neo4jErr) {
+            console.error('Neo4j mood sync error:', neo4jErr);
+        }
+
         res.status(201).json(doc);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -74,17 +88,46 @@ router.put('/:moodId', authenticate, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// DELETE (admin only)
+// DELETE (admin only) - Cascading delete
 router.delete('/:moodId', authenticate, async (req, res) => {
+    const neo4jDriver = require('neo4j-driver');
+    const { NEO4J_URI, NEO4J_USER, NEO4J_PASS } = process.env;
+    const driver = neo4jDriver.driver(NEO4J_URI, neo4jDriver.auth.basic(NEO4J_USER, NEO4J_PASS));
+    const session = driver.session();
+
     try {
         if (req.user.role !== 'admin') {
             return res.status(403).json({ error: 'Nur Admins können Moods löschen' });
         }
 
-        const result = await getDb().collection('moods').deleteOne({ moodId: req.params.moodId });
-        if (result.deletedCount === 0) return res.status(404).json({ error: 'Mood nicht gefunden' });
-        res.json({ message: 'Mood gelöscht', moodId: req.params.moodId });
-    } catch (e) { res.status(500).json({ error: e.message }); }
+        const moodId = req.params.moodId;
+
+        // 1. Get mood name to remove from MongoDB arrays
+        const moodToDelete = await getDb().collection('moods').findOne({ moodId });
+        if (!moodToDelete) return res.status(404).json({ error: 'Mood nicht gefunden' });
+
+        // 2. Remove from MongoDB 'moods' collection
+        await getDb().collection('moods').deleteOne({ moodId });
+
+        // 3. Remove from MongoDB 'tracks.mood' array
+        await getDb().collection('tracks').updateMany(
+            { mood: moodToDelete.name },
+            { $pull: { mood: moodToDelete.name } }
+        );
+
+        // 4. Remove from Neo4j (Node + Relationships)
+        await session.run(
+            'MATCH (m:Mood {moodId: $moodId}) DETACH DELETE m',
+            { moodId }
+        );
+
+        res.json({ message: 'Mood gelöscht (und aus Tracks entfernt)', moodId });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    } finally {
+        await session.close();
+        await driver.close();
+    }
 });
 
 module.exports = router;
