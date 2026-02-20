@@ -81,17 +81,23 @@ musikprojekt/
 
 ## ⚡ Setup & Installation
 
-### 1. Datenbanken starten (Docker)
-```bash
-docker-compose up -d
-```
-
-### 2. Backend installieren & starten
-```bash
-cd backend
-npm install
-npm run dev          # oder: npm start
-```
+1. Klone das Repository: `git clone <repository-url>`
+2. Wechsle in das Verzeichnis: `cd MelodyGraph_Musikempfehlung`
+3. Installiere alle Abhängigkeiten:
+   ```bash
+   cd backend && npm install
+   cd ../frontend && npm install
+   ```
+4. **Umgebungsvariablen (`.env`):**
+   Eine fertige `.env` Datei ist bereits im `backend`-Ordner für dieses Studienprojekt hinterlegt. Hier muss nichts konfiguriert werden.
+5. Starte die Docker-Container für die Datenbanken (aus dem Hauptverzeichnis):
+   ```bash
+   docker-compose up -d
+   ```
+6. **Backend und Frontend starten:**
+   Starte beide Server manuell in separaten Terminal-Fenstern:
+   - Backend: `npm run dev` (im `backend` Ordner)
+   - Frontend: `npm start` (im `frontend` Ordner)
 
 ### 3. Testdaten laden (einmalig)
 ```bash
