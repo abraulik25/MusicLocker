@@ -123,6 +123,7 @@ export default function Users() {
           <table>
             <thead>
               <tr>
+                {isAdmin && <th>ID</th>}
                 <th>Profilbild</th>
                 <th>Name</th>
                 <th>Kontakt</th>
@@ -132,6 +133,7 @@ export default function Users() {
             <tbody>
               {visibleUsers.map((u, i) => (
                 <tr key={u.userId}>
+                  {isAdmin && <td><span className="tag tag-pink">{u.userId}</span></td>}
                   <td>
                     <div
                       className="avatar"

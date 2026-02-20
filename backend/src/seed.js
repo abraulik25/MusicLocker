@@ -139,6 +139,19 @@ async function seed() {
     );
   }
 
+  // Create FOLLOWS relationships (User -> User) from seedData
+  for (const u of [adminUser, ...users]) {
+    if (u.following && u.following.length > 0) {
+      for (const targetId of u.following) {
+        await session.run(
+          `MATCH (u1:User {userId: $userId}), (u2:User {userId: $targetId})
+           MERGE (u1)-[:FOLLOWS]->(u2)`,
+          { userId: u.userId, targetId }
+        );
+      }
+    }
+  }
+
   console.log('  ✅ Neo4j – Graph gefüllt (Nodes + Relationships)');
 
   await session.close();

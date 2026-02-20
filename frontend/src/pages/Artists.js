@@ -193,6 +193,7 @@ export default function Artists() {
           <table>
             <thead>
               <tr>
+                {isAdmin && <th>ID</th>}
                 <th>Bild</th>
                 <th onClick={() => handleSort('name')} style={headerStyle('name')}>
                   Name <SortIcon column="name" />
@@ -209,6 +210,7 @@ export default function Artists() {
             <tbody>
               {sortedFilteredArtists.map((a, i) => (
                 <tr key={a.artistId}>
+                  {isAdmin && <td><span className="tag tag-pink">{a.artistId}</span></td>}
                   <td>
                     <div
                       className="avatar"

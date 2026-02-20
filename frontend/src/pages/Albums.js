@@ -224,6 +224,7 @@ export default function Albums() {
         <table>
           <thead>
             <tr>
+              {isAdmin && <th>ID</th>}
               <th onClick={() => handleSort('title')} style={headerStyle('title')}>
                 Titel <SortIcon column="title" />
               </th>
@@ -246,6 +247,7 @@ export default function Albums() {
           <tbody>
             {sortedAlbums.map(a => (
               <tr key={a.albumId}>
+                {isAdmin && <td><span className="tag tag-pink">{a.albumId}</span></td>}
                 <td>
                   <div className="flex items-center gap-3">
                     <div className="avatar avatar-sm" style={{ borderRadius: 6 }}>💿</div>

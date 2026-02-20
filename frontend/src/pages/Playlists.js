@@ -271,7 +271,10 @@ export default function Playlists() {
             {filteredPlaylists.map(p => (
               <div key={p.playlistId} className="card" style={{ padding: 18, cursor: 'pointer' }} onClick={() => setAggView(p)}>
                 <div className="flex items-center justify-between" style={{ marginBottom: 10 }}>
-                  <div style={{ fontWeight: 700, fontSize: 16 }}>{p.name}</div>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: 16 }}>{p.name}</div>
+                    {isAdmin && !p.isVirtual && <div style={{ marginTop: 2 }}><span className="tag tag-pink">{p.playlistId}</span></div>}
+                  </div>
                   <div style={{ display: 'flex', gap: 4 }}>
                     {p.isVirtual && (
                       <span style={{ fontSize: 11, background: 'var(--accent-lo)', color: 'var(--accent)', padding: '2px 8px', borderRadius: 8, fontWeight: 600 }}>

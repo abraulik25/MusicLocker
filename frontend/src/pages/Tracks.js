@@ -427,6 +427,7 @@ export default function Tracks() {
           <table>
             <thead>
               <tr>
+                {isAdmin && <th>ID</th>}
                 <th onClick={() => handleSort('title')} style={headerStyle('title')}>
                   Titel <SortIcon column="title" />
                 </th>
@@ -449,6 +450,7 @@ export default function Tracks() {
                 const trackMoods = Array.isArray(t.mood) ? t.mood : (t.mood ? [t.mood] : []);
                 return (
                   <tr key={t.trackId}>
+                    {isAdmin && <td><span className="tag tag-pink">{t.trackId}</span></td>}
                     <td style={{ fontWeight: 600, color: 'var(--text-hi)' }}>{t.title}</td>
                     <td>{artistName(t.artistId)}</td>
                     <td className="text-sm text-lo">{albumName(t.albumId) || '–'}</td>
