@@ -30,7 +30,7 @@ export default function Login() {
         <div className="auth-page">
             <div className="auth-card">
                 <div className="auth-logo">
-                    <span className="logo-icon">♫</span>
+                    <img src="/favicon.png" alt="Music Locker Logo" className="logo-image" />
                     <div className="logo-text-wrap">
                         <span className="logo-text">Music Locker</span>
                         <span className="logo-subtitle">Musikempfehlungs-System</span>

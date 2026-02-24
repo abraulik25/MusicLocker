@@ -82,7 +82,7 @@ export default function Register() {
         <div className="auth-page">
             <div className="auth-card" style={{ maxWidth: 520 }}>
                 <div className="auth-logo">
-                    <span className="logo-icon">♫</span>
+                    <img src="/favicon.png" alt="Music Locker Logo" className="logo-image" />
                     <div className="logo-text-wrap">
                         <span className="logo-text">Music Locker</span>
                         <span className="logo-subtitle">Neuen Account erstellen</span>

@@ -232,7 +232,7 @@ Die Anwendung folgt einer klassischen \textbf{3-Schichten-Architektur}:
 \subsection{Zusammenspiel Frontend -- Backend -- Datenbanken}
 
 \begin{enumerate}
-  \item \textbf{Frontend $\rightarrow$ Backend}: React-Komponenten rufen REST-Endpunkte auf (\texttt{/api/...}). Authentifizierung erfolgt über JWT-Tokens im \texttt{Authorization}-Header.
+  \item \textbf{Frontend $\rightarrow$ Backend}: React-Komponenten rufen REST-Endpunkte auf (\texttt{/api/...}). Die Authentifizierung erfolgt über JWT-Tokens im \texttt{Authorization}-Header. Eine vorgeschaltete \textbf{JWT-Middleware} im Backend prüft diese Tokens auf Gültigkeit, bevor die Anfrage an die eigentlichen Routen weitergeleitet wird.
   \item \textbf{Backend $\rightarrow$ MongoDB}: Alle CRUD-Operationen für Stammdaten (Users, Artists, Albums, Tracks, Playlists, Moods).
   \item \textbf{Backend $\rightarrow$ Neo4j}: Beziehungen und Graph-Traversierungen (Likes, Follows, Mood-Verknüpfungen, Empfehlungen).
   \item \textbf{Integration}: Der \texttt{/api/integration/recommendations}-Endpunkt kombiniert beide Datenbanken -- Neo4j liefert Empfehlungs-IDs per Graph-Traversierung, MongoDB liefert die vollständigen Track-Details.
@@ -261,11 +261,30 @@ Empfehlungen & Beide & Neo4j traversiert den Graph, MongoDB liefert die Detail-I
 \section{Datenmodelle}
 % ════════════════════════════════════════════════════════════════════════════════
 
-\subsection{MongoDB -- Collections}
+\subsection{MongoDB}
 
-\subsubsection{Collection: users}
+MongoDB fungiert als Hauptspeicher für alle Stammdaten. Da es schemafrei ist, können Dokumente flexibel erweitert werden. Dennoch wird durch Validierungslogik im Backend eine konsistente Struktur (Schema Validation) erzwungen.
 
-\begin{lstlisting}[language=java, caption={Beispieldokument: users}]
+\subsubsection{Collections}
+
+Die Datenbank \texttt{musikempfehlung} enthält folgende Haupt-Collections:
+
+\begin{itemize}
+  \item \textbf{users}: Beinhaltet Benutzerprofile, Rollen, gehashte Passwörter und Präferenzen.
+  \item \textbf{artists}: Speichert Informationen zu Musikern und Bands.
+  \item \textbf{albums}: Verwaltet Alben, deren Veröffentlichungsjahr und Track-Anzahl.
+  \item \textbf{tracks}: Enthält einzelne Songs, deren Metadaten und zugeordnete Stimmungen (Moods).
+  \item \textbf{playlists}: Protokolliert von Benutzern erstellte Song-Sammlungen.
+  \item \textbf{moods}: Beschreibt die im System verfügbaren Stimmungen für das Empfehlungssystem.
+\end{itemize}
+
+\subsubsection{Schema-Definition und Beispiele}
+
+Nachfolgend sind die JSON-Schemata für die wichtigsten Entitäten dargestellt.
+
+\textbf{1. User (Benutzer)} Ein User repräsentiert eine Person, die das System nutzt.
+
+\begin{lstlisting}
 {
   "userId": "user_001",
   "name": "Anna Schmidt",
@@ -280,9 +299,9 @@ Empfehlungen & Beide & Neo4j traversiert den Graph, MongoDB liefert die Detail-I
 }
 \end{lstlisting}
 
-\subsubsection{Collection: artists}
+\textbf{2. Artist (Künstler)} Ein Artist repräsentiert einen Musiker oder eine Band.
 
-\begin{lstlisting}[language=java, caption={Beispieldokument: artists}]
+\begin{lstlisting}
 {
   "artistId": "art_001",
   "name": "Michael Jackson",
@@ -295,9 +314,9 @@ Empfehlungen & Beide & Neo4j traversiert den Graph, MongoDB liefert die Detail-I
 }
 \end{lstlisting}
 
-\subsubsection{Collection: albums}
+\textbf{3. Album} Ein Album gruppiert mehrere Tracks eines Künstlers.
 
-\begin{lstlisting}[language=java, caption={Beispieldokument: albums}]
+\begin{lstlisting}
 {
   "albumId": "alb_001",
   "artistId": "art_001",
@@ -311,9 +330,9 @@ Empfehlungen & Beide & Neo4j traversiert den Graph, MongoDB liefert die Detail-I
 }
 \end{lstlisting}
 
-\subsubsection{Collection: tracks}
+\textbf{4. Track (Song)} Ein Track ist ein einzelnes Musikstück mit zugeordneten Moods.
 
-\begin{lstlisting}[language=java, caption={Beispieldokument: tracks}]
+\begin{lstlisting}
 {
   "trackId": "trk_001",
   "albumId": "alb_001",
@@ -327,9 +346,9 @@ Empfehlungen & Beide & Neo4j traversiert den Graph, MongoDB liefert die Detail-I
 }
 \end{lstlisting}
 
-\subsubsection{Collection: playlists}
+\textbf{5. Playlist} Eine Playlist ist eine vom Benutzer erstellte Sammlung von Tracks.
 
-\begin{lstlisting}[language=java, caption={Beispieldokument: playlists}]
+\begin{lstlisting}
 {
   "playlistId": "pl_001",
   "userId": "user_001",
@@ -342,9 +361,9 @@ Empfehlungen & Beide & Neo4j traversiert den Graph, MongoDB liefert die Detail-I
 }
 \end{lstlisting}
 
-\subsubsection{Collection: moods}
+\textbf{6. Mood (Stimmung)} Ein Mood fungiert als Tag für das Empfehlungssystem.
 
-\begin{lstlisting}[language=java, caption={Beispieldokument: moods}]
+\begin{lstlisting}
 {
   "moodId": "mood_001",
   "name": "Happy",
@@ -354,7 +373,7 @@ Empfehlungen & Beide & Neo4j traversiert den Graph, MongoDB liefert die Detail-I
 }
 \end{lstlisting}
 
-\subsection{Neo4j -- Node-Labels und Relationship-Typen}
+\subsection{Neo4j}
 
 \subsubsection{Node-Labels}
 

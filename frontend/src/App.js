@@ -34,7 +34,7 @@ function Sidebar() {
   return (
     <nav className="sidebar">
       <div className="sidebar-logo">
-        <span className="logo-icon">♫</span>
+        <img src="/favicon.png" alt="Music Locker Logo" className="logo-image" />
         <div className="logo-text-wrap">
           <span className="logo-text">Music Locker</span>
           <span className="logo-subtitle">Dein Musik-Netzwerk</span>
